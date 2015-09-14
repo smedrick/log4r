@@ -11,7 +11,7 @@ module Log4r
   # [<tt>:filename</tt>]   Name of the file to log to.
   # [<tt>:trunc</tt>]      Truncate the file?
   class FileOutputter < IOOutputter
-    attr_reader :trunc, :filename
+    attr_reader :trunc, :filename, :readable
 
     def initialize(_name, hash={})
       super(_name, nil, hash)
@@ -19,6 +19,7 @@ module Log4r
       @trunc = Log4rTools.decode_bool(hash, :trunc, false)
       _filename = (hash[:filename] or hash['filename'])
       @create = Log4rTools.decode_bool(hash, :create, true)
+      @writable = Log4rTools.decode_bool(hash, :writable, false)
 
       if _filename.class != String
         raise TypeError, "Argument 'filename' must be a String", caller
@@ -40,6 +41,7 @@ module Log4r
 
       @filename = _filename
       if ( @create == true ) then
+        File.umask(0000) if @writable
 	@out = File.new(@filename, (@trunc ? "wb" : "ab"))
         @out.sync = Log4rTools.decode_bool(hash, :sync, false)
 	Logger.log_internal {

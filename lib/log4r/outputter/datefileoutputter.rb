@@ -107,6 +107,7 @@ module Log4r
         }
       end
       makeNewFilename
+      File.umask(0000) if @writable
       @out = File.new(@filename, (@trunc ? "wb" : "ab"))
       Logger.log_internal {
         "DateFileOutputter '#{@name}' now writing to #{@filename}"
